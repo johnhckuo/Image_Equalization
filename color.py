@@ -1,15 +1,40 @@
 # coding=utf-8
 import cv2;
+import numpy as np;  
+
 
 #用於製作二維陣列用的function
 def zerolistmaker(n):
     return ([0] * n, [0] * n, [0] * n, [0] * n, [0] * n, [0] * n);
 	
+#用於繪製RGB直方圖的function
+def calcAndDrawHist(image, color):    
+	hist= cv2.calcHist([image], [0], None, [256], [0.0,255.0]);    
+	minVal, maxVal, minLoc, maxLoc = cv2.minMaxLoc(hist);    
+	histImg = np.zeros([256,256,3], np.uint8);    
+	hpt = int(0.9* 256);    
+        
+	for h in range(256):    
+		intensity = int(hist[h]*hpt/maxVal);    
+		cv2.line(histImg,(h,256), (h,256-intensity), color);    
+            
+	return histImg;   
+
 #載入圖片
 img = cv2.imread('mp1a.jpg', 1);   # 1代表彩色圖片 (0用於灰階圖片)
 
 #將顏色RGB各別取出並丟給b,g,r三個二維陣列存放
 b,g,r = cv2.split(img);   
+
+#計算並顯示出原圖的RGB直方圖
+histImgB = calcAndDrawHist(b, [255, 0, 0]);    
+histImgG = calcAndDrawHist(g, [0, 255, 0]);    
+histImgR = calcAndDrawHist(r, [0, 0, 255]);    
+        
+cv2.imshow("oldB", histImgB)    
+cv2.imshow("oldG", histImgG)    
+cv2.imshow("oldR", histImgR)    
+
 
 #計算圖片的長和寬，並且計算圖片總像素
 height = len(b);
@@ -67,7 +92,16 @@ for i in range(0, height, 1):
 		newPixel = newG[g[i][j]];
 		g[i][j] = newPixel;
 		
-
+#計算並顯示出新圖片的RGB直方圖
+histImgB2 = calcAndDrawHist(b, [255, 0, 0])    
+histImgG2 = calcAndDrawHist(g, [0, 255, 0])    
+histImgR2 = calcAndDrawHist(r, [0, 0, 255])    
+        
+cv2.imshow("newB", histImgB2)    
+cv2.imshow("newG", histImgG2)    
+cv2.imshow("newR", histImgR2)  
+		
+		
 #將新的RGB merge成新的圖片
 img2 = cv2.merge((b,g,r));
 

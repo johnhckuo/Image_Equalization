@@ -1,12 +1,31 @@
 # coding=utf-8
 import cv2;
-
+import numpy as np;
+  
 #用於製作二維陣列用的function
 def zerolistmaker(n):
     return ([0] * n, [0] * n);
 	
+#用於繪製灰階直方圖的function
+def calcAndDrawHist(image, color):    
+	hist= cv2.calcHist([image], [0], None, [256], [0.0,255.0]);    
+	minVal, maxVal, minLoc, maxLoc = cv2.minMaxLoc(hist);    
+	histImg = np.zeros([256,256,3], np.uint8);    
+	hpt = int(0.9* 256);    
+        
+	for h in range(256):    
+		intensity = int(hist[h]*hpt/maxVal);    
+		cv2.line(histImg,(h,256), (h,256-intensity), color);    
+            
+	return histImg;   
+	
 #載入圖片
 img = cv2.imread('mp1.jpg', 0);  # 0代表灰階圖片 (1用於彩色圖片)
+
+#計算並顯示出原圖的灰階直方圖
+histImgG = calcAndDrawHist(img, [255, 255, 255]);     
+cv2.imshow("oldGray", histImgG);    
+ 
 
 #計算圖片的長和寬，並且計算圖片總像素
 height = len(img);
@@ -39,9 +58,13 @@ for i in range(0, height, 1):
 	for j in range(0, width, 1):
 		newPixel = newGray[img[i][j]];
 		img[i][j] = newPixel;
+		
+#計算並顯示出新的灰階直方圖
+histImgG2 = calcAndDrawHist(img, [255, 255, 255]);     
+cv2.imshow("newGray", histImgG2); 
 
 #顯示等化後結果
-cv2.imshow('newGray',img);
+cv2.imshow('newPicture',img);
 
 cv2.waitKey(0);
 cv2.destroyAllWindows();

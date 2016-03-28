@@ -1,5 +1,20 @@
 # coding=utf-8
 import cv2;
+import numpy as np;  
+
+#用於繪製V值直方圖的function
+def calcAndDrawHist(image, color):    
+	hist= cv2.calcHist([image], [0], None, [256], [0.0,255.0])    
+	minVal, maxVal, minLoc, maxLoc = cv2.minMaxLoc(hist)    
+	histImg = np.zeros([256,256,3], np.uint8)    
+	hpt = int(0.9* 256);    
+        
+	for h in range(256):    
+		intensity = int(hist[h]*hpt/maxVal)    
+		cv2.line(histImg,(h,256), (h,256-intensity), color)    
+            
+	return histImg;  
+
 
 #載入圖片
 img = cv2.imread('mp1a.jpg');
@@ -8,6 +23,10 @@ img = cv2.imread('mp1a.jpg');
 img2 = cv2.cvtColor(img, cv2.COLOR_BGR2HSV);
 H, S, V = cv2.split(img2);  
 bits = 256;
+
+#計算並顯示出原圖的V值直方圖
+histImgV = calcAndDrawHist(V, [255, 255, 255]);  
+cv2.imshow("oldV", histImgV)  
 
 #宣告兩個一維陣列，VDis存放V值的分布數量，newV則存放各Y等化過後的新的對應值
 VDis = [0]*bits;
@@ -39,7 +58,10 @@ for i in range(0, height, 1):
 	for j in range(0, width, 1):
 		newPixel = newV[V[i][j]];
 		V[i][j] = newPixel;
-
+		
+#計算並顯示出新的V值直方圖
+histImgV2 = calcAndDrawHist(V, [255, 255, 255]);  
+cv2.imshow("newV", histImgV2)  
 
 #將新的HSV merge成新的圖片
 img2 = cv2.merge((H, S, V));

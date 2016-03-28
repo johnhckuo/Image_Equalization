@@ -1,10 +1,30 @@
 # coding=utf-8
 import cv2
+import numpy as np;
+
+#用於繪製YCbCr直方圖的function
+def calcAndDrawHist(image, color):    
+	hist= cv2.calcHist([image], [0], None, [256], [0.0,255.0]);    
+	minVal, maxVal, minLoc, maxLoc = cv2.minMaxLoc(hist);    
+	histImg = np.zeros([256,256,3], np.uint8);    
+	hpt = int(0.9* 256);    
+        
+	for h in range(256):    
+		intensity = int(hist[h]*hpt/maxVal);    
+		cv2.line(histImg,(h,256), (h,256-intensity), color);    
+            
+	return histImg;  
+
+#載入圖片
 img = cv2.imread('mp1a.jpg')
 
 #將原本圖片的BGR格式轉換為YCbCr格式，並且將值各別取出
 img2 = cv2.cvtColor(img, cv2.COLOR_BGR2YCR_CB)
 Y, Cb, Cr = cv2.split(img2);  
+
+#計算並顯示出原圖的YCbCr的Y值直方圖
+histImgY = calcAndDrawHist(Y, [255, 255, 255]);     
+cv2.imshow("oldY", histImgY);   
 
 #Y的公式為0.299*R + 0.587*G + 0.114*B，因此其範圍為0~255
 bits = 256;
@@ -39,7 +59,10 @@ for i in range(0, height, 1):
 	for j in range(0, width, 1):
 		newPixel = newY[Y[i][j]];
 		Y[i][j] = newPixel;
-
+		
+#計算並顯示出全新的YCbCr的Y值直方圖
+histImgY2 = calcAndDrawHist(Y, [255, 255, 255]);     
+cv2.imshow("newY", histImgY2);   
 
 #將新的YCbCr merge成新的圖片
 img2 = cv2.merge((Y, Cb, Cr));
